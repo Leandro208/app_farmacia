@@ -17,9 +17,6 @@ class HomePage extends StatelessWidget {
       "Bom estoque": 3,
     };
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Farmacia'),
-      ),
       body: Column(
         children: [
           SizedBox(height: 20,),

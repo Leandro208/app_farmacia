@@ -1,3 +1,4 @@
+import 'package:app_farmacia/components/main_drawer.dart';
 import 'package:app_farmacia/screens/form_produto.dart';
 import 'package:app_farmacia/screens/form_venda.dart';
 import 'package:app_farmacia/screens/home_page.dart';
@@ -15,6 +16,11 @@ class _TabsScreenState extends State<TabsScreen> {
   int _selectedIndex = 1;
   bool _showLabels = true;
   late final List<Widget> _pages; 
+  final List<String> _titles = [
+    'Cadastrar Medicamento',
+    'Farmacia',
+    'Cadastrar Venda'
+  ];
 
   @override
   void initState() {
@@ -35,6 +41,11 @@ class _TabsScreenState extends State<TabsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          _titles[_selectedIndex],
+        ),
+      ),
       body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: AppColors.colorPrimary,
@@ -61,6 +72,7 @@ class _TabsScreenState extends State<TabsScreen> {
         unselectedItemColor: Colors.white,
         onTap: _onItemTapped,
       ),
+      drawer: MainDrawer(),
     );
   }
 }
