@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 
 class AppColors{
 
-  static Color colorPrimary = Colors.green;
-
+  static Color colorPrimary = Colors.purple;
+  static Color colorSecondary = Colors.yellow;
   static List<Color> colorsValidade = <Color>[
     Colors.red,
     Colors.yellow

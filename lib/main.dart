@@ -1,4 +1,4 @@
-import 'package:app_farmacia/screens/home_page.dart';
+import 'package:app_farmacia/screens/tabs_screen.dart';
 import 'package:app_farmacia/utils/app_routes.dart';
 import 'package:flutter/material.dart';
 
@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
       title: 'Farmacia',
       initialRoute: AppRoutes.HOME,
       routes: {
-        AppRoutes.HOME: (ctx) => HomePage()
+        AppRoutes.HOME: (ctx) => TabsScreen()
       },
       debugShowCheckedModeBanner: false,
     );
