@@ -1,6 +1,7 @@
 import 'package:app_farmacia/model/categoria_medicamento.dart';
 import 'package:app_farmacia/model/farmacia_provider.dart';
 import 'package:app_farmacia/model/produto.dart';
+import 'package:app_farmacia/utils/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -82,7 +83,7 @@ class _FormProdutoState extends State<FormProduto> {
       context,
       listen: false,
     ).saveProduto(_formData).then((value) {
-      Navigator.of(context).pop();
+      Navigator.pushNamed(context, AppRoutes.HOME);
     });
     print('${_formData['nome']} - ${_formData['categoria']} - ${_formData['preco']} - ${_formData['validade']} - ${_formData['estoque']} - ${_formData['fornecedor']}');
   }

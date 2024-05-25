@@ -51,7 +51,7 @@ class _TabsScreenState extends State<TabsScreen> {
         backgroundColor: AppColors.colorPrimary,
 
         showSelectedLabels:
-            _showLabels, // Mostra o rótulo apenas do item selecionado
+            _showLabels, 
         showUnselectedLabels: false,
         items: const [
           BottomNavigationBarItem(

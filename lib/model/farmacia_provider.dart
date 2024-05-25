@@ -10,14 +10,30 @@ class FarmaciaProvider extends ChangeNotifier {
     final _baseUrl = 'https://farmacia-78f3f-default-rtdb.firebaseio.com/';
     List<Produto> _produtos = [];
 
+    Map<String, double> _mapDashboardValidade = Map();
+    Map<String, double> _mapDashboardEstoque = Map();
+
+    bool isLoadDashboard = false;
 
     FarmaciaProvider(){
-      fetchProdutos();
+     _init();
+    }
+
+    _init() async{
+      isLoadDashboard = true;
+      notifyListeners();
+      await fetchProdutos();
+      loadDashboard();
+      isLoadDashboard = false;
+      notifyListeners();
     }
 
     List<Produto> get produtos {
     return [..._produtos];
-  }
+    }
+
+    Map<String, double> get mapDashboardEstoque => _mapDashboardEstoque;
+    Map<String, double> get mapDashboardValidade => _mapDashboardValidade;
 
     Future<void> addProduto(Produto produto) {
     final future = http.post(Uri.parse('$_baseUrl/produto.json'),
@@ -100,5 +116,35 @@ class FarmaciaProvider extends ChangeNotifier {
     } else {
       throw Exception('Falha ao ler os produtos');
     }
+  }
+
+  void loadDashboard(){
+    double bomEstoque = 0;
+    double acabandoEstoque = 0;
+
+    double pertoDeVencer = 0;
+    double emValidade = 0;
+
+     DateTime hoje = DateTime.now();
+
+     // Calcula a data daqui a uma semana
+     DateTime umaSemanaDepois = hoje.add(Duration(days: 7));
+    for (var produto in _produtos) {
+      if(produto.estoque >= 2){
+        bomEstoque++;
+      } else acabandoEstoque++;
+
+      if(produto.validade.isAfter(umaSemanaDepois)){
+        emValidade++;
+      } else if (produto.validade.isBefore(umaSemanaDepois)){
+        pertoDeVencer++;
+      }
+    }
+     _mapDashboardEstoque['Acabando estoque'] = acabandoEstoque;
+    _mapDashboardEstoque['Bom estoque'] = bomEstoque;
+
+    _mapDashboardValidade['Vencem em 1 semana'] = pertoDeVencer;
+    _mapDashboardValidade['Produto em validade'] = emValidade;
+    notifyListeners();
   }
 }

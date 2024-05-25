@@ -1,6 +1,8 @@
 import 'package:app_farmacia/model/farmacia_provider.dart';
 import 'package:app_farmacia/model/produto.dart';
+import 'package:app_farmacia/utils/app_routes.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class ManageProduto extends StatefulWidget {
@@ -17,6 +19,9 @@ class _ManageProdutoState extends State<ManageProduto> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Buscar Produtos'),
+        leading: IconButton(
+            onPressed: () => Navigator.pushNamed(context, AppRoutes.HOME),
+            icon: const Icon(Icons.arrow_back)),
       ),
       body: Column(
         children: [
@@ -57,9 +62,9 @@ class _ManageProdutoState extends State<ManageProduto> {
                   itemBuilder: (context, index) {
                     final produto = produtos[index];
                     return ListTile(
-                      title: Text(produto.nome),
+                      title: Text('${produto.nome} | ${DateFormat('dd/MM/yyyy').format(produto.validade)}'),
                       subtitle: Text('Categoria: ${produto.categoria}'),
-                      trailing: Text('Preço: ${produto.preco.toString()}'),
+                      trailing: Text('Preço: ${produto.preco.toString()} | ${produto.estoque}und'),
                     );
                   },
                 );

@@ -1,23 +1,23 @@
 import 'package:app_farmacia/components/grafico.dart';
+import 'package:app_farmacia/model/farmacia_provider.dart';
 import 'package:app_farmacia/utils/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+  HomePage({super.key});
+  late FarmaciaProvider controller;
 
   @override
   Widget build(BuildContext context) {
-      Map<String, double> dataMapValidade = {
-      "Vencem em 1 semana": 4,
-      "Produto em validade": 6,
-    };
+      controller = Provider.of<FarmaciaProvider>(context);
+      Map<String, double> dataMapValidade = controller.mapDashboardValidade;
 
-    Map<String, double> dataMapEstoque = {
-      "Acabando estoque": 7,
-      "Bom estoque": 3,
-    };
+    Map<String, double> dataMapEstoque = controller.mapDashboardEstoque;
     return Scaffold(
-      body: Column(
+      body: (controller.isLoadDashboard) 
+      ? const Center(child: CircularProgressIndicator(),)
+      : Column(
         children: [
           SizedBox(height: 20,),
           Container(
@@ -32,7 +32,7 @@ class HomePage extends StatelessWidget {
             child: Grafico(
               dataMap: dataMapValidade, 
               colorList: AppColors.colorsValidade, 
-              labelCenter: 'Validade')
+              labelCenter: '')
               ),
            SizedBox(height: 40,),
           Container(
@@ -47,12 +47,10 @@ class HomePage extends StatelessWidget {
             child: Grafico(
               dataMap: dataMapEstoque, 
               colorList: AppColors.colorsEstoque, 
-              labelCenter: 'Estoque')
+              labelCenter: '')
               ),
         ],
-      ),
+      ) ,
     );
   }
-
-
 }
