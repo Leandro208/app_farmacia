@@ -44,6 +44,8 @@ class MainDrawer extends StatelessWidget {
           ),
           _createItem(Icons.home, 'Inicio',
               () => Navigator.of(context).pushReplacementNamed(AppRoutes.HOME)),
+          _createItem(Icons.home, 'Gerenciar Medicamentos',
+              () => Navigator.of(context).pushReplacementNamed(AppRoutes.MANAGE_PRODUTOS)),
         ],
       ),
     );

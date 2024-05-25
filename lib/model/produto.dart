@@ -1,7 +1,7 @@
 import 'package:app_farmacia/model/categoria_medicamento.dart';
 
 class Produto {
-  int? id;
+  String id;
   String nome;
   CategoriaMedicamento categoria;
   double preco;
@@ -10,7 +10,7 @@ class Produto {
   String fornecedor;
 
   Produto({
-    this.id,
+    required this.id,
     required this.nome,
     required this.categoria,
     required this.preco,
