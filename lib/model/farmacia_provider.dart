@@ -23,7 +23,7 @@ class FarmaciaProvider extends ChangeNotifier {
       isLoadDashboard = true;
       notifyListeners();
       await fetchProdutos();
-      loadDashboard();
+      //loadDashboard();
       isLoadDashboard = false;
       notifyListeners();
     }
@@ -46,7 +46,6 @@ class FarmaciaProvider extends ChangeNotifier {
           "fornecedor": produto.fornecedor
         }));
     return future.then((response) {
-      //print('espera a requisição acontecer');
       print(jsonDecode(response.body));
       final id = jsonDecode(response.body)['name'];
       print(response.statusCode);
@@ -60,18 +59,58 @@ class FarmaciaProvider extends ChangeNotifier {
           fornecedor: produto.fornecedor
           ));
       notifyListeners();
+      fetchProdutos();
     });
-    // print('executa em sequencia');
   }
-  Future<void> updateProduto(Produto produto) {
-    int index = _produtos.indexWhere((p) => p.id == produto.id);
+  Future<void> updateProduto(Produto produto) async {
+  final url = '$_baseUrl/produto/${produto.id}.json';
 
-    if (index >= 0) {
-      _produtos[index] = produto;
+  try {
+    final response = await http.put(
+      Uri.parse(url),
+      body: jsonEncode({
+        "nome": produto.nome,
+        "categoria": produto.categoria.toString().split('.').last,
+        "preco": produto.preco,
+        "validade": produto.validade.toIso8601String(),
+        "estoque": produto.estoque,
+        "fornecedor": produto.fornecedor,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      // Produto atualizado com sucesso
       notifyListeners();
+      fetchProdutos();
+    } else {
+      // Se a resposta não for bem-sucedida, lance uma exceção
+      throw 'Falha ao atualizar o produto. Status code: ${response.statusCode}';
     }
-    return Future.value();
+  } catch (error) {
+    // Capture qualquer exceção e lance novamente
+    throw 'Falha ao atualizar o produto: $error';
   }
+}
+
+
+  Future<void> deleteProduct(Produto produto) async {
+  final url = '$_baseUrl/produto/${produto.id}.json';
+
+  try {
+    final response = await http.delete(Uri.parse(url));
+    if (response.statusCode == 200) {
+      _produtos.removeWhere((p) => p.id == produto.id);
+      notifyListeners();
+      fetchProdutos();
+    } else {
+      throw 'Falha ao deletar o produto. Status code: ${response.statusCode}';
+    }
+  } catch (error) {
+    throw 'Falha ao deletar o produto: $error';
+  }
+}
+
+
   Future<void> saveProduto(Map<String, Object> data) {
     bool hasId = data['id'] != null;
 
@@ -113,6 +152,7 @@ class FarmaciaProvider extends ChangeNotifier {
       });
       _produtos = loadedProdutos;
       notifyListeners();
+      loadDashboard();
     } else {
       throw Exception('Falha ao ler os produtos');
     }

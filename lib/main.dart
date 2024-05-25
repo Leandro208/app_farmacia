@@ -1,4 +1,6 @@
 import 'package:app_farmacia/model/farmacia_provider.dart';
+import 'package:app_farmacia/screens/detail_produto.dart';
+import 'package:app_farmacia/screens/form_produto.dart';
 import 'package:app_farmacia/screens/manage_produtos.dart';
 import 'package:app_farmacia/screens/tabs_screen.dart';
 import 'package:app_farmacia/utils/app_routes.dart';
@@ -21,7 +23,9 @@ class MyApp extends StatelessWidget {
         initialRoute: AppRoutes.HOME,
         routes: {
           AppRoutes.HOME: (ctx) => TabsScreen(),
-          AppRoutes.MANAGE_PRODUTOS: (ctx) => ManageProduto() 
+          AppRoutes.MANAGE_PRODUTOS: (ctx) => ManageProduto(),
+          AppRoutes.DETALHES_PRODUTO: (ctx) => DetalhesProduto(),
+          AppRoutes.CADASTRAR_PRODUTO: (ctx) => FormProduto()
         },
         debugShowCheckedModeBanner: false,
       ),

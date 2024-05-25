@@ -6,22 +6,24 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class ManageProduto extends StatefulWidget {
-  const ManageProduto({super.key});
+  const ManageProduto({Key? key}) : super(key: key);
 
   @override
   State<ManageProduto> createState() => _ManageProdutoState();
 }
 
 class _ManageProdutoState extends State<ManageProduto> {
- String _filtro = '';
+  String _filtro = '';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Buscar Produtos'),
         leading: IconButton(
-            onPressed: () => Navigator.pushNamed(context, AppRoutes.HOME),
-            icon: const Icon(Icons.arrow_back)),
+          onPressed: () => Navigator.pushNamed(context, AppRoutes.HOME),
+          icon: const Icon(Icons.arrow_back),
+        ),
       ),
       body: Column(
         children: [
@@ -62,9 +64,43 @@ class _ManageProdutoState extends State<ManageProduto> {
                   itemBuilder: (context, index) {
                     final produto = produtos[index];
                     return ListTile(
-                      title: Text('${produto.nome} | ${DateFormat('dd/MM/yyyy').format(produto.validade)}'),
-                      subtitle: Text('Categoria: ${produto.categoria}'),
-                      trailing: Text('Preço: ${produto.preco.toString()} | ${produto.estoque}und'),
+                      title: Text(produto.nome),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Validade: ${DateFormat('dd/MM/yyyy').format(produto.validade)}'),
+                          Text('Preço: ${produto.preco.toString()}'),
+                        ],
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                             Navigator.pushNamed(
+                          context,
+                          AppRoutes.CADASTRAR_PRODUTO,
+                          arguments: produto,
+                        );
+                            },
+                            icon: Icon(Icons.edit),
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              Provider.of<FarmaciaProvider>(context,listen: false).deleteProduct(produto);
+                            },
+                            icon: Icon(Icons.delete),
+                          ),
+                        ],
+                      ),
+                      onTap: () {
+                        // Navegar para a tela de detalhes do produto
+                        Navigator.pushNamed(
+                          context,
+                          AppRoutes.DETALHES_PRODUTO,
+                          arguments: produto,
+                        );
+                      },
                     );
                   },
                 );

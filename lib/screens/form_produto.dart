@@ -54,7 +54,7 @@ class _FormProdutoState extends State<FormProduto> {
         _formData['validade'] = produto.validade;
         _formData['estoque'] = produto.estoque;
         _formData['fornecedor'] = produto.fornecedor;
-
+        _categoriaSelecionada = produto.categoria;
         _validadeController.text = DateFormat('dd/MM/yyyy').format(produto.validade);
       }
     }
