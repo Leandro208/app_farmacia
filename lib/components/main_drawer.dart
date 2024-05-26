@@ -52,8 +52,8 @@ class MainDrawer extends StatelessWidget {
           _createItem(
               Icons.history,
               'Histórico de vendas',
-              () => Navigator.of(context)
-                  .pushReplacementNamed(AppRoutes.HISTORICO_VENDAS)),
+              () =>
+                  Navigator.of(context).pushNamed(AppRoutes.HISTORICO_VENDAS)),
         ],
       ),
     );
