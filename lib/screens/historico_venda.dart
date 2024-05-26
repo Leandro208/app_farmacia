@@ -33,16 +33,20 @@ class HistoricoVendas extends StatelessWidget {
                   Container(
                     margin: const EdgeInsets.only(left: 15),
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
                             'Data da venda:${produtos[index].dataVenda.substring(0, 10)}'),
-                        IconButton(
-                          onPressed: () {
-                            Provider.of<FarmaciaProvider>(context,
-                                    listen: false)
-                                .deleteHistoricoVenda(produtos[index]);
-                          },
-                          icon: const Icon(Icons.delete),
+                        Container(
+                          margin: const EdgeInsets.only(right: 50),
+                          child: IconButton(
+                            onPressed: () {
+                              Provider.of<FarmaciaProvider>(context,
+                                      listen: false)
+                                  .deleteHistoricoVenda(produtos[index]);
+                            },
+                            icon: const Icon(Icons.delete),
+                          ),
                         ),
                       ],
                     ),
