@@ -50,15 +50,18 @@ class Produto {
 }
 
 class ProdutoPost {
+  String id;
   List listaProduto;
   String dataVenda;
   ProdutoPost({
+    required this.id,
     required this.listaProduto,
     required this.dataVenda,
   });
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
+      "id": id,
       "listaProduto": listaProduto.map((x) => x.toJson()).toList(),
       "dataVenda": dataVenda,
     };
@@ -66,6 +69,7 @@ class ProdutoPost {
 
   factory ProdutoPost.fromJson(Map<String, dynamic> map) {
     return ProdutoPost(
+      id: map['id']??'',
       listaProduto: List<Produto>.from(
         (map['listaProduto'] as List).map<Produto>(
           (x) => Produto.fromJson(x as Map<String, dynamic>),

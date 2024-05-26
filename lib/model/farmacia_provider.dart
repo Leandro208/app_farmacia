@@ -169,6 +169,7 @@ class FarmaciaProvider extends ChangeNotifier {
       final List<ProdutoPost> loadedProdutos = [];
       extractedData.forEach((prodId, prodData) {
         loadedProdutos.add(ProdutoPost(
+          id: prodId,
           dataVenda: prodData['dataVenda'],
           listaProduto:
               prodData['listaProduto'].map((e) => Produto.fromJson(e)).toList(),
@@ -177,6 +178,23 @@ class FarmaciaProvider extends ChangeNotifier {
       _produtosVendidos = loadedProdutos;
       notifyListeners();
       loadDashboard();
+    }
+  }
+
+  Future<void> deleteHistoricoVenda(ProdutoPost produto) async {
+    final url = '$_baseUrl/historicoVenda/${produto.id}.json';
+
+    try {
+      final response = await http.delete(Uri.parse(url));
+      if (response.statusCode == 200) {
+        _produtosVendidos.removeWhere((p) => p.id == produto.id);
+        notifyListeners();
+        fetchProdutos();
+      } else {
+        throw 'Falha ao deletar o produto. Status code: ${response.statusCode}';
+      }
+    } catch (error) {
+      throw 'Falha ao deletar o produto: $error';
     }
   }
 

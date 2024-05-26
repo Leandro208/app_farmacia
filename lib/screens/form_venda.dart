@@ -194,6 +194,7 @@ class _FormVendaState extends State<FormVenda> {
                   listen: false,
                 )
                     .addVenda(ProdutoPost(
+                      id: '',
                       dataVenda: DateTime.now().toString(),
                       listaProduto: produtosVendidos,
                     ))

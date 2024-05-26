@@ -32,8 +32,20 @@ class HistoricoVendas extends StatelessWidget {
                 children: [
                   Container(
                     margin: const EdgeInsets.only(left: 15),
-                    child: Text(
-                        'Data da venda:${produtos[index].dataVenda.substring(0, 10)}'),
+                    child: Row(
+                      children: [
+                        Text(
+                            'Data da venda:${produtos[index].dataVenda.substring(0, 10)}'),
+                        IconButton(
+                          onPressed: () {
+                            Provider.of<FarmaciaProvider>(context,
+                                    listen: false)
+                                .deleteHistoricoVenda(produtos[index]);
+                          },
+                          icon: const Icon(Icons.delete),
+                        ),
+                      ],
+                    ),
                   ),
                   _buildarDadosInternos(produtos[index]),
                   if (index != produtos.length - 1) const Divider()
@@ -60,31 +72,11 @@ class HistoricoVendas extends StatelessWidget {
             children: [
               Text(
                   'Validade: ${DateFormat('dd/MM/yyyy').format(produtoFinal.validade)}'),
+              Text('Quantidade: ${produtoFinal.quantidadeVendida}'),
               Text('Preço: ${produtoFinal.preco.toString()}'),
             ],
           ),
-          // trailing: Row(
-          //   mainAxisSize: MainAxisSize.min,
-          //   children: [
-          //     IconButton(
-          //       onPressed: () {
-          //         Navigator.pushNamed(
-          //           context,
-          //           AppRoutes.CADASTRAR_PRODUTO,
-          //           arguments: produtoFinal,
-          //         );
-          //       },
-          //       icon: const Icon(Icons.edit),
-          //     ),
-          //     IconButton(
-          //       onPressed: () {
-          //         Provider.of<FarmaciaProvider>(context, listen: false)
-          //             .deleteProduct(produtoFinal);
-          //       },
-          //       icon: const Icon(Icons.delete),
-          //     ),
-          //   ],
-          // ),
+
           // onTap: () {
           //   // Navegar para a tela de detalhes do produto
           //   Navigator.pushNamed(
