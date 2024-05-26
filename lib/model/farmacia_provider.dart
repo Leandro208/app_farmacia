@@ -7,35 +7,41 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class FarmaciaProvider extends ChangeNotifier {
-    final _baseUrl = 'https://farmacia-78f3f-default-rtdb.firebaseio.com/';
-    List<Produto> _produtos = [];
+  final _baseUrl = 'https://farmacia-78f3f-default-rtdb.firebaseio.com';
+  List<Produto> _produtos = [];
+  List<ProdutoPost> _produtosVendidos = [];
 
-    Map<String, double> _mapDashboardValidade = Map();
-    Map<String, double> _mapDashboardEstoque = Map();
+  final Map<String, double> _mapDashboardValidade = {};
+  final Map<String, double> _mapDashboardEstoque = {};
 
-    bool isLoadDashboard = false;
+  bool isLoadDashboard = false;
 
-    FarmaciaProvider(){
-     _init();
-    }
+  FarmaciaProvider() {
+    _init();
+  }
 
-    _init() async{
-      isLoadDashboard = true;
-      notifyListeners();
-      await fetchProdutos();
-      //loadDashboard();
-      isLoadDashboard = false;
-      notifyListeners();
-    }
+  _init() async {
+    isLoadDashboard = true;
+    notifyListeners();
+    await fetchProdutos();
+    await getProdutosVendidos();
+    //loadDashboard();
+    isLoadDashboard = false;
+    notifyListeners();
+  }
 
-    List<Produto> get produtos {
+  List<Produto> get produtos {
     return [..._produtos];
-    }
+  }
 
-    Map<String, double> get mapDashboardEstoque => _mapDashboardEstoque;
-    Map<String, double> get mapDashboardValidade => _mapDashboardValidade;
+  List<ProdutoPost> get historicoVendas {
+    return [..._produtosVendidos];
+  }
 
-    Future<void> addProduto(Produto produto) {
+  Map<String, double> get mapDashboardEstoque => _mapDashboardEstoque;
+  Map<String, double> get mapDashboardValidade => _mapDashboardValidade;
+
+  Future<void> addProduto(Produto produto) {
     final future = http.post(Uri.parse('$_baseUrl/produto.json'),
         body: jsonEncode({
           "nome": produto.nome,
@@ -56,73 +62,70 @@ class FarmaciaProvider extends ChangeNotifier {
           preco: produto.preco,
           validade: produto.validade,
           estoque: produto.estoque,
-          fornecedor: produto.fornecedor
-          ));
+          fornecedor: produto.fornecedor));
       notifyListeners();
       fetchProdutos();
     });
   }
+
   Future<void> updateProduto(Produto produto) async {
-  final url = '$_baseUrl/produto/${produto.id}.json';
+    final url = '$_baseUrl/produto/${produto.id}.json';
 
-  try {
-    final response = await http.put(
-      Uri.parse(url),
-      body: jsonEncode({
-        "nome": produto.nome,
-        "categoria": produto.categoria.toString().split('.').last,
-        "preco": produto.preco,
-        "validade": produto.validade.toIso8601String(),
-        "estoque": produto.estoque,
-        "fornecedor": produto.fornecedor,
-      }),
-    );
+    try {
+      final response = await http.put(
+        Uri.parse(url),
+        body: jsonEncode({
+          "nome": produto.nome,
+          "categoria": produto.categoria.toString().split('.').last,
+          "preco": produto.preco,
+          "validade": produto.validade.toIso8601String(),
+          "estoque": produto.estoque,
+          "fornecedor": produto.fornecedor,
+        }),
+      );
 
-    if (response.statusCode == 200) {
-      // Produto atualizado com sucesso
-      notifyListeners();
-      fetchProdutos();
-    } else {
-      // Se a resposta não for bem-sucedida, lance uma exceção
-      throw 'Falha ao atualizar o produto. Status code: ${response.statusCode}';
+      if (response.statusCode == 200) {
+        // Produto atualizado com sucesso
+        notifyListeners();
+        fetchProdutos();
+      } else {
+        // Se a resposta não for bem-sucedida, lance uma exceção
+        throw 'Falha ao atualizar o produto. Status code: ${response.statusCode}';
+      }
+    } catch (error) {
+      // Capture qualquer exceção e lance novamente
+      throw 'Falha ao atualizar o produto: $error';
     }
-  } catch (error) {
-    // Capture qualquer exceção e lance novamente
-    throw 'Falha ao atualizar o produto: $error';
   }
-}
-
 
   Future<void> deleteProduct(Produto produto) async {
-  final url = '$_baseUrl/produto/${produto.id}.json';
+    final url = '$_baseUrl/produto/${produto.id}.json';
 
-  try {
-    final response = await http.delete(Uri.parse(url));
-    if (response.statusCode == 200) {
-      _produtos.removeWhere((p) => p.id == produto.id);
-      notifyListeners();
-      fetchProdutos();
-    } else {
-      throw 'Falha ao deletar o produto. Status code: ${response.statusCode}';
+    try {
+      final response = await http.delete(Uri.parse(url));
+      if (response.statusCode == 200) {
+        _produtos.removeWhere((p) => p.id == produto.id);
+        notifyListeners();
+        fetchProdutos();
+      } else {
+        throw 'Falha ao deletar o produto. Status code: ${response.statusCode}';
+      }
+    } catch (error) {
+      throw 'Falha ao deletar o produto: $error';
     }
-  } catch (error) {
-    throw 'Falha ao deletar o produto: $error';
   }
-}
-
 
   Future<void> saveProduto(Map<String, Object> data) {
     bool hasId = data['id'] != null;
 
     final produto = Produto(
-      id: hasId ? data['id'] as String : Random().nextDouble().toString(),
-      nome: data['nome'] as String,
-      categoria: data['categoria'] as CategoriaMedicamento,
-      preco: data['preco'] as double,
-      validade: data['validade'] as DateTime,
-      estoque: data['estoque'] as int,
-      fornecedor: data['fornecedor'] as String
-    );
+        id: hasId ? data['id'] as String : Random().nextDouble().toString(),
+        nome: data['nome'] as String,
+        categoria: data['categoria'] as CategoriaMedicamento,
+        preco: data['preco'] as double,
+        validade: data['validade'] as DateTime,
+        estoque: data['estoque'] as int,
+        fornecedor: data['fornecedor'] as String);
 
     if (hasId) {
       return updateProduto(produto);
@@ -131,7 +134,7 @@ class FarmaciaProvider extends ChangeNotifier {
     }
   }
 
-   Future<void> fetchProdutos() async {
+  Future<void> fetchProdutos() async {
     final response = await http.get(Uri.parse('$_baseUrl/produto.json'));
 
     if (response.statusCode == 200) {
@@ -158,29 +161,63 @@ class FarmaciaProvider extends ChangeNotifier {
     }
   }
 
-  void loadDashboard(){
+  Future<void> getProdutosVendidos() async {
+    final response = await http.get(Uri.parse('$_baseUrl/historicoVenda.json'));
+
+    if (response.statusCode == 200 && response.body != 'null') {
+      final extractedData = jsonDecode(response.body) as Map<String, dynamic>;
+      final List<ProdutoPost> loadedProdutos = [];
+      extractedData.forEach((prodId, prodData) {
+        loadedProdutos.add(ProdutoPost(
+          dataVenda: prodData['dataVenda'],
+          listaProduto:
+              prodData['listaProduto'].map((e) => Produto.fromJson(e)).toList(),
+        ));
+      });
+      _produtosVendidos = loadedProdutos;
+      notifyListeners();
+      loadDashboard();
+    }
+  }
+
+  Future<void> addVenda(ProdutoPost produto) {
+    final future = http.post(Uri.parse('$_baseUrl/historicoVenda.json'),
+        body: jsonEncode(produto.toJson()));
+    return future.then((response) {
+      print(jsonDecode(response.body));
+
+      print(response.statusCode);
+
+      notifyListeners();
+      fetchProdutos();
+    });
+  }
+
+  void loadDashboard() {
     double bomEstoque = 0;
     double acabandoEstoque = 0;
 
     double pertoDeVencer = 0;
     double emValidade = 0;
 
-     DateTime hoje = DateTime.now();
+    DateTime hoje = DateTime.now();
 
-     // Calcula a data daqui a uma semana
-     DateTime umaSemanaDepois = hoje.add(Duration(days: 7));
+    // Calcula a data daqui a uma semana
+    DateTime umaSemanaDepois = hoje.add(const Duration(days: 7));
     for (var produto in _produtos) {
-      if(produto.estoque >= 2){
+      if (produto.estoque >= 2) {
         bomEstoque++;
-      } else acabandoEstoque++;
+      } else {
+        acabandoEstoque++;
+      }
 
-      if(produto.validade.isAfter(umaSemanaDepois)){
+      if (produto.validade.isAfter(umaSemanaDepois)) {
         emValidade++;
-      } else if (produto.validade.isBefore(umaSemanaDepois)){
+      } else if (produto.validade.isBefore(umaSemanaDepois)) {
         pertoDeVencer++;
       }
     }
-     _mapDashboardEstoque['Acabando estoque'] = acabandoEstoque;
+    _mapDashboardEstoque['Acabando estoque'] = acabandoEstoque;
     _mapDashboardEstoque['Bom estoque'] = bomEstoque;
 
     _mapDashboardValidade['Vencem em 1 semana'] = pertoDeVencer;

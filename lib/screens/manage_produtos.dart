@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class ManageProduto extends StatefulWidget {
-  const ManageProduto({Key? key}) : super(key: key);
+  const ManageProduto({super.key});
 
   @override
   State<ManageProduto> createState() => _ManageProdutoState();
@@ -19,7 +19,7 @@ class _ManageProdutoState extends State<ManageProduto> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Buscar Produtos'),
+        title: const Text('Buscar Produtos'),
         leading: IconButton(
           onPressed: () => Navigator.pushNamed(context, AppRoutes.HOME),
           icon: const Icon(Icons.arrow_back),
@@ -30,7 +30,7 @@ class _ManageProdutoState extends State<ManageProduto> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Buscar por nome',
                 prefixIcon: Icon(Icons.search),
               ),
@@ -54,7 +54,7 @@ class _ManageProdutoState extends State<ManageProduto> {
                 }
 
                 if (produtos.isEmpty) {
-                  return Center(
+                  return const Center(
                     child: Text('Nenhum produto encontrado.'),
                   );
                 }
@@ -68,7 +68,8 @@ class _ManageProdutoState extends State<ManageProduto> {
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Validade: ${DateFormat('dd/MM/yyyy').format(produto.validade)}'),
+                          Text(
+                              'Validade: ${DateFormat('dd/MM/yyyy').format(produto.validade)}'),
                           Text('Preço: ${produto.preco.toString()}'),
                         ],
                       ),
@@ -77,19 +78,21 @@ class _ManageProdutoState extends State<ManageProduto> {
                         children: [
                           IconButton(
                             onPressed: () {
-                             Navigator.pushNamed(
-                          context,
-                          AppRoutes.CADASTRAR_PRODUTO,
-                          arguments: produto,
-                        );
+                              Navigator.pushNamed(
+                                context,
+                                AppRoutes.CADASTRAR_PRODUTO,
+                                arguments: produto,
+                              );
                             },
-                            icon: Icon(Icons.edit),
+                            icon: const Icon(Icons.edit),
                           ),
                           IconButton(
                             onPressed: () {
-                              Provider.of<FarmaciaProvider>(context,listen: false).deleteProduct(produto);
+                              Provider.of<FarmaciaProvider>(context,
+                                      listen: false)
+                                  .deleteProduct(produto);
                             },
-                            icon: Icon(Icons.delete),
+                            icon: const Icon(Icons.delete),
                           ),
                         ],
                       ),

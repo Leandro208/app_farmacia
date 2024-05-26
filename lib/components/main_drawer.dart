@@ -13,7 +13,7 @@ class MainDrawer extends StatelessWidget {
       ),
       title: Text(
         label,
-        style: TextStyle(
+        style: const TextStyle(
           fontFamily: 'RobotoCondensed',
           fontSize: 24,
           fontWeight: FontWeight.bold,
@@ -25,13 +25,13 @@ class MainDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return  Drawer(
+    return Drawer(
       child: Column(
         children: [
           Container(
             height: 120,
             width: double.infinity,
-            padding: EdgeInsets.all(40),
+            padding: const EdgeInsets.all(40),
             color: AppColors.colorPrimary,
             alignment: Alignment.bottomRight,
             child: Text(
@@ -44,8 +44,16 @@ class MainDrawer extends StatelessWidget {
           ),
           _createItem(Icons.home, 'Inicio',
               () => Navigator.of(context).pushReplacementNamed(AppRoutes.HOME)),
-          _createItem(Icons.home, 'Gerenciar Medicamentos',
-              () => Navigator.of(context).pushReplacementNamed(AppRoutes.MANAGE_PRODUTOS)),
+          _createItem(
+              Icons.manage_search,
+              'Gerenciar Medicamentos',
+              () => Navigator.of(context)
+                  .pushReplacementNamed(AppRoutes.MANAGE_PRODUTOS)),
+          _createItem(
+              Icons.history,
+              'Histórico de vendas',
+              () => Navigator.of(context)
+                  .pushReplacementNamed(AppRoutes.HISTORICO_VENDAS)),
         ],
       ),
     );

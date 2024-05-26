@@ -15,7 +15,7 @@ class TabsScreen extends StatefulWidget {
 class _TabsScreenState extends State<TabsScreen> {
   int _selectedIndex = 1;
   bool _showLabels = true;
-  late final List<Widget> _pages; 
+  late final List<Widget> _pages;
   final List<String> _titles = [
     'Cadastrar Medicamento',
     'Farmacia',
@@ -26,10 +26,10 @@ class _TabsScreenState extends State<TabsScreen> {
   void initState() {
     super.initState();
     _pages = [
-      FormProduto(),
+      const FormProduto(),
       HomePage(),
-      FormVenda(),
-    ]; 
+      const FormVenda(),
+    ];
   }
 
   void _onItemTapped(int index) {
@@ -38,6 +38,7 @@ class _TabsScreenState extends State<TabsScreen> {
       _showLabels = true;
     });
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,9 +50,7 @@ class _TabsScreenState extends State<TabsScreen> {
       body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: AppColors.colorPrimary,
-
-        showSelectedLabels:
-            _showLabels, 
+        showSelectedLabels: _showLabels,
         showUnselectedLabels: false,
         items: const [
           BottomNavigationBarItem(
@@ -72,7 +71,7 @@ class _TabsScreenState extends State<TabsScreen> {
         unselectedItemColor: Colors.white,
         onTap: _onItemTapped,
       ),
-      drawer: MainDrawer(),
+      drawer: const MainDrawer(),
     );
   }
 }

@@ -14,4 +14,8 @@ enum CategoriaMedicamento {
   String toString() {
     return descricao;
   }
+
+  toJson() {
+    return descricao;
+  }
 }
