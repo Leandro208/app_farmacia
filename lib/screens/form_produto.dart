@@ -173,7 +173,16 @@ class _FormProdutoState extends State<FormProduto> {
                 keyboardType: TextInputType.number,
                 onSaved: (estoque) =>
                     _formData['estoque'] = int.parse(estoque ?? '0'),
-                validator: ValidaFormProdutos.validaCampo,
+                validator: (_estoque) {
+                  final estoqueString = _estoque ?? '';
+                  final estoque = int.tryParse(estoqueString) ?? -1;
+
+                  if (estoque < 0) {
+                    return 'Informe uma quantidade de estoque válida.';
+                  }
+
+                  return null;
+                },
               ),
               SizedBox(height: 20),
               ElevatedButton(
