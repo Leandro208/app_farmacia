@@ -1,8 +1,10 @@
 import 'package:app_farmacia/model/farmacia_provider.dart';
 import 'package:app_farmacia/model/produto.dart';
+import 'package:app_farmacia/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:app_farmacia/utils/app_routes.dart';
 
 class HistoricoVendas extends StatelessWidget {
   const HistoricoVendas({super.key});
@@ -12,6 +14,10 @@ class HistoricoVendas extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Todas as vendas'),
+        leading: IconButton(
+          onPressed: () => Navigator.pushNamed(context, AppRoutes.HOME),
+          icon: const Icon(Icons.arrow_back),
+        ),
       ),
       body: Consumer<FarmaciaProvider>(
         builder: (context, farmaciaProvider, child) {
@@ -27,33 +33,33 @@ class HistoricoVendas extends StatelessWidget {
             itemCount: produtos.length,
             shrinkWrap: true,
             itemBuilder: (context, index) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    margin: const EdgeInsets.only(left: 15),
-                    child: Row(
+              return Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: AppColors.colorPrimary, width: 2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                            'Data da venda:${produtos[index].dataVenda.substring(0, 10)}'),
-                        Container(
-                          margin: const EdgeInsets.only(right: 50),
-                          child: IconButton(
-                            onPressed: () {
-                              Provider.of<FarmaciaProvider>(context,
-                                      listen: false)
-                                  .deleteHistoricoVenda(produtos[index]);
-                            },
-                            icon: const Icon(Icons.delete),
-                          ),
+                        Text('Data da venda: ${produtos[index].dataVenda.substring(0, 10)}'),
+                        IconButton(
+                          onPressed: () {
+                            Provider.of<FarmaciaProvider>(context, listen: false)
+                                .deleteHistoricoVenda(produtos[index]);
+                          },
+                          icon: const Icon(Icons.delete),
                         ),
                       ],
                     ),
-                  ),
-                  _buildarDadosInternos(produtos[index]),
-                  if (index != produtos.length - 1) const Divider()
-                ],
+                    _buildarDadosInternos(produtos[index]),
+                    if (index != produtos.length - 1) const Divider()
+                  ],
+                ),
               );
             },
           );
@@ -69,26 +75,24 @@ class HistoricoVendas extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       itemBuilder: (context, index) {
         var produtoFinal = produto.listaProduto[index];
-        return ListTile(
-          title: Text(produtoFinal.nome),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                  'Validade: ${DateFormat('dd/MM/yyyy').format(produtoFinal.validade)}'),
-              Text('Quantidade: ${produtoFinal.quantidadeVendida}'),
-              Text('Preço: ${produtoFinal.preco.toString()}'),
-            ],
+        return Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey),
+            borderRadius: BorderRadius.circular(8),
           ),
-
-          // onTap: () {
-          //   // Navegar para a tela de detalhes do produto
-          //   Navigator.pushNamed(
-          //     context,
-          //     AppRoutes.DETALHES_PRODUTO,
-          //     arguments: produtoFinal,
-          //   );
-          // },
+          margin: const EdgeInsets.symmetric(vertical: 5),
+          padding: const EdgeInsets.all(10),
+          child: ListTile(
+            title: Text(produtoFinal.nome),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Validade: ${DateFormat('dd/MM/yyyy').format(produtoFinal.validade)}'),
+                Text('Quantidade: ${produtoFinal.quantidadeVendida}'),
+                Text('Preço: ${produtoFinal.preco.toString()}'),
+              ],
+            ),
+          ),
         );
       },
     );

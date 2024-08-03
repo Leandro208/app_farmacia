@@ -10,6 +10,7 @@ class Produto {
   int estoque;
   String fornecedor;
   int quantidadeVendida;
+  
   Produto({
     required this.id,
     required this.nome,

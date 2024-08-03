@@ -1,6 +1,7 @@
 import 'package:app_farmacia/model/categoria_medicamento.dart';
 import 'package:app_farmacia/model/farmacia_provider.dart';
 import 'package:app_farmacia/model/produto.dart';
+import 'package:app_farmacia/screens/validacao.dart';
 import 'package:app_farmacia/utils/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -107,17 +108,7 @@ class _FormProdutoState extends State<FormProduto> {
                   FocusScope.of(context).requestFocus(_priceFocus);
                 },
                 onSaved: (nome) => _formData['nome'] = nome ?? '',
-                validator: (_nome) {
-                  final nome = _nome ?? '';
-
-                  if (nome.trim().isEmpty) {
-                    return 'Nome é obrigatório';
-                  }
-                  if (nome.trim().length < 3) {
-                    return 'Nome precisa no mínimo de 3 letras.';
-                  }
-                  return null;
-                },
+                validator: ValidaFormProdutos.validaCampo,
               ),
               DropdownButtonFormField<CategoriaMedicamento>(
                 value: _categoriaSelecionada,
@@ -133,12 +124,7 @@ class _FormProdutoState extends State<FormProduto> {
                     _categoriaSelecionada = newValue;
                   });
                 },
-                validator: (value) {
-                  if (value == null) {
-                    return 'Por favor, selecione uma categoria';
-                  }
-                  return null;
-                },
+                validator: ValidaFormProdutos.validaCampo,
               ),
               TextFormField(
                 initialValue: _formData['preco']?.toString(),
@@ -153,16 +139,7 @@ class _FormProdutoState extends State<FormProduto> {
                 },
                 onSaved: (preco) =>
                     _formData['preco'] = double.parse(preco ?? '0'),
-                validator: (_preco) {
-                  final precoString = _preco ?? '';
-                  final preco = double.tryParse(precoString) ?? -1;
-
-                  if (preco <= 0) {
-                    return 'Informe um preço válido.';
-                  }
-
-                  return null;
-                },
+                validator: ValidaFormProdutos.validaCampo,
               ),
               TextFormField(
                 controller: _validadeController,
@@ -174,12 +151,7 @@ class _FormProdutoState extends State<FormProduto> {
                   ),
                 ),
                 readOnly: true,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor, insira a validade do produto';
-                  }
-                  return null;
-                },
+                validator: ValidaFormProdutos.validaCampo
               ),
               TextFormField(
                 initialValue: _formData['fornecedor']?.toString(),
@@ -191,17 +163,7 @@ class _FormProdutoState extends State<FormProduto> {
                   FocusScope.of(context).requestFocus(_estoqueFocus);
                 },
                 onSaved: (fornecedor) => _formData['fornecedor'] = fornecedor ?? '',
-                validator: (_fornecedor) {
-                  final fornecedor = _fornecedor ?? '';
-
-                  if (fornecedor.trim().isEmpty) {
-                    return 'Fornecedor é obrigatório';
-                  }
-                  if (fornecedor.trim().length < 3) {
-                    return 'Fornecedor precisa no mínimo de 3 letras.';
-                  }
-                  return null;
-                },
+                validator: ValidaFormProdutos.validaCampo,
               ),
               TextFormField(
                 initialValue: _formData['estoque']?.toString(),
@@ -211,16 +173,7 @@ class _FormProdutoState extends State<FormProduto> {
                 keyboardType: TextInputType.number,
                 onSaved: (estoque) =>
                     _formData['estoque'] = int.parse(estoque ?? '0'),
-                validator: (_estoque) {
-                  final estoqueString = _estoque ?? '';
-                  final estoque = int.tryParse(estoqueString) ?? -1;
-
-                  if (estoque < 0) {
-                    return 'Informe uma quantidade de estoque válida.';
-                  }
-
-                  return null;
-                },
+                validator: ValidaFormProdutos.validaCampo,
               ),
               SizedBox(height: 20),
               ElevatedButton(

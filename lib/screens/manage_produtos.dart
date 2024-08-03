@@ -71,6 +71,7 @@ class _ManageProdutoState extends State<ManageProduto> {
                           Text(
                               'Validade: ${DateFormat('dd/MM/yyyy').format(produto.validade)}'),
                           Text('Preço: ${produto.preco.toString()}'),
+                          Text('Estoque: ${produto.estoque.toString()}'),
                         ],
                       ),
                       trailing: Row(

@@ -18,6 +18,7 @@ class _FormVendaState extends State<FormVenda> {
   List<Produto> produtos = [];
   List<Produto> produtosVendidos = [];
   bool isCarregando = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,7 +41,8 @@ class _FormVendaState extends State<FormVenda> {
           Expanded(
             child: Consumer<FarmaciaProvider>(
               builder: (context, farmaciaProvider, child) {
-                produtos = farmaciaProvider.produtos;
+                produtos = farmaciaProvider.produtos.where((produto) => produto.estoque > 0).toList();
+
                 if (_filtro.isNotEmpty) {
                   produtos = produtos
                       .where((produto) => produto.nome
@@ -59,6 +61,18 @@ class _FormVendaState extends State<FormVenda> {
                   itemCount: produtos.length,
                   itemBuilder: (context, index) {
                     final produto = produtos[index];
+                    final produtoVendido = produtosVendidos.firstWhere(
+                        (pd) => pd.id == produto.id,
+                        orElse: () => Produto(
+                            id: produto.id,
+                            nome: produto.nome,
+                            categoria: produto.categoria,
+                            preco: produto.preco,
+                            validade: produto.validade,
+                            estoque: produto.estoque,
+                            fornecedor: produto.fornecedor,
+                            quantidadeVendida: 0));
+
                     return ListTile(
                       title: Text(produto.nome),
                       subtitle: Column(
@@ -76,72 +90,36 @@ class _FormVendaState extends State<FormVenda> {
                             onPressed: isCarregando
                                 ? null
                                 : () {
-                                    String idRemocao = '';
-                                    for (Produto pd in produtosVendidos) {
-                                      if (pd.id == produto.id &&
-                                          pd.quantidadeVendida > 0) {
-                                        pd.quantidadeVendida -= 1;
-                                      }
-
-                                      if (pd.quantidadeVendida == 0) {
-                                        idRemocao = pd.id;
-                                      }
-                                    }
                                     setState(() {
-                                      produtosVendidos.removeWhere(
-                                          (pd) => pd.id == idRemocao);
+                                      if (produtoVendido.quantidadeVendida > 0) {
+                                        produtoVendido.quantidadeVendida--;
+                                        if (produtoVendido.quantidadeVendida == 0) {
+                                          produtosVendidos.remove(produtoVendido);
+                                        }
+                                      }
                                     });
                                   },
                             icon: const Icon(Icons.remove),
                           ),
-                          Text(produtosVendidos
-                              .firstWhere(
-                                (pd) => pd.id == produto.id,
-                                orElse: () => Produto(
-                                    id: '0',
-                                    nome: 'nome',
-                                    categoria: CategoriaMedicamento.ANALGESICO,
-                                    preco: 0,
-                                    validade: DateTime.now(),
-                                    estoque: 0,
-                                    fornecedor: '',
-                                    quantidadeVendida: 0),
-                              )
-                              .quantidadeVendida
-                              .toString()),
+                          Text(produtoVendido.quantidadeVendida.toString()),
                           IconButton(
                             onPressed: isCarregando
                                 ? null
                                 : () {
-                                    bool idEncontrado = false;
-                                    bool podeAdicionar = true;
-                                    for (Produto pd in produtosVendidos) {
-                                      if (pd.id != produto.id) continue;
-                                      if (pd.quantidadeVendida < pd.estoque) {
-                                        pd.quantidadeVendida++;
-                                        idEncontrado = true;
+                                    setState(() {
+                                      if (produtoVendido.quantidadeVendida < produto.estoque) {
+                                        produtoVendido.quantidadeVendida++;
+                                        if (!produtosVendidos.contains(produtoVendido)) {
+                                          produtosVendidos.add(produtoVendido);
+                                        }
+                                      } else {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(
+                                            content: Text('Estoque insuficiente.'),
+                                          ),
+                                        );
                                       }
-                                      if (pd.quantidadeVendida == pd.estoque) {
-                                        podeAdicionar = false;
-                                      }
-                                    }
-                                    if (!idEncontrado &&
-                                        podeAdicionar &&
-                                        produto.estoque > 0) {
-                                      produtosVendidos.add(
-                                        Produto(
-                                          id: produto.id,
-                                          nome: produto.nome,
-                                          categoria: produto.categoria,
-                                          preco: produto.preco,
-                                          validade: produto.validade,
-                                          estoque: produto.estoque,
-                                          fornecedor: produto.fornecedor,
-                                          quantidadeVendida: 1,
-                                        ),
-                                      );
-                                    }
-                                    setState(() {});
+                                    });
                                   },
                             icon: const Icon(Icons.add),
                           ),
@@ -186,8 +164,6 @@ class _FormVendaState extends State<FormVenda> {
                     ).updateProduto(produtos[id]);
                   }
                 }
-                // log(jsonEncode(
-                //     produtosVendidos.map((e) => e.toJson()).toList()));
 
                 Provider.of<FarmaciaProvider>(
                   context,

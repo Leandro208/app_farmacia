@@ -31,6 +31,8 @@ class DetalhesProduto extends StatelessWidget {
             SizedBox(height: 8),
             Text('Fornecedor: ${produto.fornecedor}'),
             SizedBox(height: 16),
+            Text('Estoque: ${produto.estoque}'),
+            SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
