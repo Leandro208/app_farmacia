@@ -139,7 +139,16 @@ class _FormProdutoState extends State<FormProduto> {
                 },
                 onSaved: (preco) =>
                     _formData['preco'] = double.parse(preco ?? '0'),
-                validator: ValidaFormProdutos.validaCampo,
+                validator: (_preco) {
+                  final precoString = _preco ?? '';
+                  final preco = double.tryParse(precoString) ?? -1;
+
+                  if (preco <= 0) {
+                    return 'Informe um preço válido.';
+                  }
+
+                  return null;
+                },
               ),
               TextFormField(
                 controller: _validadeController,

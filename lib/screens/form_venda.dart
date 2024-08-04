@@ -1,6 +1,7 @@
 import 'package:app_farmacia/model/categoria_medicamento.dart';
 import 'package:app_farmacia/model/farmacia_provider.dart';
 import 'package:app_farmacia/model/produto.dart';
+import 'package:app_farmacia/service/notification_service.dart';
 import 'package:app_farmacia/utils/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -18,6 +19,7 @@ class _FormVendaState extends State<FormVenda> {
   List<Produto> produtos = [];
   List<Produto> produtosVendidos = [];
   bool isCarregando = false;
+  final NotificationService notificationService = NotificationService();
 
   @override
   Widget build(BuildContext context) {
@@ -178,6 +180,15 @@ class _FormVendaState extends State<FormVenda> {
                       (teste) => setState(
                         () {
                           isCarregando = false;
+                          produtosVendidos.forEach((produtoVendido) {
+                            if (produtoVendido.quantidadeVendida == produtoVendido.estoque) {
+                              // Exibir notificação quando o estoque acabar
+                              notificationService.showNotification(
+                                'Estoque zerado',
+                                'O produto ${produtoVendido.nome} acabou de zerar o estoque',
+                              );
+                            }
+                          });
                           produtosVendidos.clear();
                           Provider.of<FarmaciaProvider>(context, listen: false)
                               .getProdutosVendidos()
@@ -188,7 +199,7 @@ class _FormVendaState extends State<FormVenda> {
                                       Text('Venda concluída com sucesso!')),
                             );
                             Navigator.pushNamed(
-                                context, AppRoutes.HISTORICO_VENDAS);
+                                context, AppRoutes.HOME);
                           });
                         },
                       ),
