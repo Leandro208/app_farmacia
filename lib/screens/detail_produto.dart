@@ -11,46 +11,63 @@ class DetalhesProduto extends StatelessWidget {
         ModalRoute.of(context)!.settings.arguments as Produto;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Detalhes do Produto'),
+        title: const Text('Detalhes do Produto'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: ListView(
           children: [
-            Text(
-              'Nome: ${produto.nome}',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 8),
-            Text('Categoria: ${produto.categoria}'),
-            SizedBox(height: 8),
-            Text('Validade: ${DateFormat('dd/MM/yyyy').format(produto.validade)}'),
-            SizedBox(height: 8),
-            Text('Preço: ${produto.preco.toString()}'),
-            SizedBox(height: 8),
-            Text('Fornecedor: ${produto.fornecedor}'),
-            SizedBox(height: 16),
-            Text('Estoque: ${produto.estoque}'),
-            SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    // Implemente a lógica para editar o produto
-                    // Você pode navegar para uma tela de edição passando o produto como argumento
-                  },
-                  child: Text('Editar'),
+            Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15.0),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: CircleAvatar(
+                        radius: 50,
+                        backgroundImage: NetworkImage(
+                          'https://via.placeholder.com/150',
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    ListTile(
+                      title: const Text('Nome'),
+                      subtitle: Text(produto.nome),
+                    ),
+                    Divider(),
+                    ListTile(
+                      title: const Text('Categoria'),
+                      subtitle: Text(produto.categoria.toString()),
+                    ),
+                    Divider(),
+                    ListTile(
+                      title: const Text('Validade'),
+                      subtitle: Text(DateFormat('dd/MM/yyyy').format(produto.validade)),
+                    ),
+                    Divider(),
+                    ListTile(
+                      title: const Text('Preço'),
+                      subtitle: Text('R\$ ${produto.preco.toStringAsFixed(2)}'),
+                    ),
+                    Divider(),
+                    ListTile(
+                      title: const Text('Fornecedor'),
+                      subtitle: Text(produto.fornecedor),
+                    ),
+                    Divider(),
+                    ListTile(
+                      title: const Text('Estoque'),
+                      subtitle: Text(produto.estoque.toString()),
+                    ),
+                  ],
                 ),
-                ElevatedButton(
-                  onPressed: () {
-                    // Implemente a lógica para remover o produto
-                    // Você pode exibir um diálogo de confirmação antes de remover o produto
-                  },
-                  child: Text('Remover'),
-                ),
-              ],
+              ),
             ),
           ],
         ),
