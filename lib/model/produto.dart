@@ -48,7 +48,7 @@ class Produto {
       validade: DateTime.fromMillisecondsSinceEpoch(map["validade"] as int),
       estoque: map["estoque"] as int,
       fornecedor: map["fornecedor"] as String,
-      base64Imagem: map["base64Imagem"] as String,
+      base64Imagem: map["base64Imagem"] ?? '',
       quantidadeVendida: map["quantidadeVendida"] as int,
     );
   }
