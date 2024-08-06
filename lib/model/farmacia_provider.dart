@@ -56,7 +56,8 @@ class FarmaciaProvider extends ChangeNotifier {
           "preco": produto.preco,
           "validade": produto.validade.toIso8601String(),
           "estoque": produto.estoque,
-          "fornecedor": produto.fornecedor
+          "fornecedor": produto.fornecedor,
+          "base64Imagem": produto.base64Imagem ?? ''
         }));
     return future.then((response) {
       print(jsonDecode(response.body));
@@ -69,7 +70,8 @@ class FarmaciaProvider extends ChangeNotifier {
           preco: produto.preco,
           validade: produto.validade,
           estoque: produto.estoque,
-          fornecedor: produto.fornecedor));
+          fornecedor: produto.fornecedor,
+          base64Imagem: produto.base64Imagem));
       notifyListeners();
       fetchProdutos();
     });
@@ -88,6 +90,7 @@ class FarmaciaProvider extends ChangeNotifier {
           "validade": produto.validade.toIso8601String(),
           "estoque": produto.estoque,
           "fornecedor": produto.fornecedor,
+          "base64Imagem": produto.base64Imagem ?? ''
         }),
       );
 
@@ -112,6 +115,7 @@ class FarmaciaProvider extends ChangeNotifier {
       final response = await http.delete(Uri.parse(url));
       if (response.statusCode == 200) {
         _produtos.removeWhere((p) => p.id == produto.id);
+        await _sharedPrefs.save(SharedPrefs.produtosGerais, _produtos); // Atualiza o SharedPrefs
         notifyListeners();
         fetchProdutos();
       } else {
@@ -132,7 +136,8 @@ class FarmaciaProvider extends ChangeNotifier {
         preco: data['preco'] as double,
         validade: data['validade'] as DateTime,
         estoque: data['estoque'] as int,
-        fornecedor: data['fornecedor'] as String);
+        fornecedor: data['fornecedor'] as String,
+        base64Imagem: data['base64Imagem'] as String?);
 
     if (hasId) {
       return updateProduto(produto);
@@ -159,6 +164,7 @@ class FarmaciaProvider extends ChangeNotifier {
             validade: DateTime.parse(prodData['validade']),
             estoque: prodData['estoque'],
             fornecedor: prodData['fornecedor'],
+            base64Imagem: prodData['base64Imagem'] ?? '',
           ));
         });
         _produtos = loadedProdutos;
@@ -251,8 +257,9 @@ class FarmaciaProvider extends ChangeNotifier {
     DateTime hoje = DateTime.now();
 
     // Calcula a data daqui a uma semana
-    DateTime umaSemanaDepois = hoje.add(const Duration(days: 7));
-    for (var produto in _produtos) {
+    DateTime umaSemanaDepois = hoje.add(Duration(days: 7));
+
+    for (Produto produto in produtos) {
       if (produto.estoque >= 2) {
         bomEstoque++;
       } else {

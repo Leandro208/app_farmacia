@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:app_farmacia/model/produto.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -9,6 +12,13 @@ class DetalhesProduto extends StatelessWidget {
   Widget build(BuildContext context) {
     final Produto produto =
         ModalRoute.of(context)!.settings.arguments as Produto;
+    
+    // Decodificar a imagem base64 para exibir no CircleAvatar
+    final String? base64Imagem = produto.base64Imagem;
+    final Uint8List? imagemBytes = base64Imagem != null 
+        ? base64Decode(base64Imagem) 
+        : null;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Detalhes do Produto'),
@@ -30,9 +40,11 @@ class DetalhesProduto extends StatelessWidget {
                     Center(
                       child: CircleAvatar(
                         radius: 50,
-                        backgroundImage: NetworkImage(
-                          'https://via.placeholder.com/150',
-                        ),
+                        backgroundImage: imagemBytes != null
+                            ? MemoryImage(imagemBytes) 
+                            : const NetworkImage(
+                                'https://via.placeholder.com/150',
+                              ) as ImageProvider,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -40,27 +52,27 @@ class DetalhesProduto extends StatelessWidget {
                       title: const Text('Nome'),
                       subtitle: Text(produto.nome),
                     ),
-                    Divider(),
+                    const Divider(),
                     ListTile(
                       title: const Text('Categoria'),
                       subtitle: Text(produto.categoria.toString()),
                     ),
-                    Divider(),
+                    const Divider(),
                     ListTile(
                       title: const Text('Validade'),
                       subtitle: Text(DateFormat('dd/MM/yyyy').format(produto.validade)),
                     ),
-                    Divider(),
+                    const Divider(),
                     ListTile(
                       title: const Text('Preço'),
                       subtitle: Text('R\$ ${produto.preco.toStringAsFixed(2)}'),
                     ),
-                    Divider(),
+                    const Divider(),
                     ListTile(
                       title: const Text('Fornecedor'),
                       subtitle: Text(produto.fornecedor),
                     ),
-                    Divider(),
+                    const Divider(),
                     ListTile(
                       title: const Text('Estoque'),
                       subtitle: Text(produto.estoque.toString()),

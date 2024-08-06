@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:app_farmacia/model/categoria_medicamento.dart';
 import 'package:app_farmacia/model/farmacia_provider.dart';
 import 'package:app_farmacia/model/produto.dart';
@@ -91,13 +90,14 @@ class _FormProdutoState extends State<FormProduto> {
     ).saveProduto(_formData).then((value) {
       Navigator.pushNamed(context, AppRoutes.HOME);
     });
-    print(
-        '${_formData['nome']} - ${_formData['categoria']} - ${_formData['preco']} - ${_formData['validade']} - ${_formData['estoque']} - ${_formData['fornecedor']}');
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text('Formulário de Produto'),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(15),
         child: Form(
@@ -113,7 +113,8 @@ class _FormProdutoState extends State<FormProduto> {
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.black),
                       ),
-                      child: _formData['base64Imagem'] != null
+                      child: _formData['base64Imagem'] != null &&
+                              (_formData['base64Imagem'] as String).isNotEmpty
                           ? Image.memory(
                               base64Decode(_formData['base64Imagem'] as String))
                           : const Icon(Icons.image_not_supported),
@@ -256,9 +257,14 @@ class _FormProdutoState extends State<FormProduto> {
           children: [
             GestureDetector(
               onTap: () async {
-                _formData['base64Imagem'] =
-                    await AnexoService().anexarImagem(TipoArquivo.galeria) ??
-                        '';
+                final base64Imagem = await AnexoService()
+                    .anexarImagem(TipoArquivo.galeria);
+                if (base64Imagem != null) {
+                  setState(() {
+                    _formData['base64Imagem'] = base64Imagem;
+                  });
+                  Navigator.pop(context);
+                }
               },
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -266,8 +272,7 @@ class _FormProdutoState extends State<FormProduto> {
                 children: [
                   Container(
                     decoration: BoxDecoration(
-                        border:
-                            Border.all(color: Colors.orange.withOpacity(0.4)),
+                        border: Border.all(color: Colors.orange.withOpacity(0.4)),
                         borderRadius: BorderRadius.circular(30)),
                     child: const Padding(
                       padding: EdgeInsets.all(12),
@@ -287,9 +292,14 @@ class _FormProdutoState extends State<FormProduto> {
             ),
             GestureDetector(
               onTap: () async {
-                _formData['base64Imagem'] =
-                    await AnexoService().anexarImagem(TipoArquivo.storage) ??
-                        '';
+                final base64Imagem = await AnexoService()
+                    .anexarImagem(TipoArquivo.storage);
+                if (base64Imagem != null) {
+                  setState(() {
+                    _formData['base64Imagem'] = base64Imagem;
+                  });
+                  Navigator.pop(context);
+                }
               },
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -297,8 +307,7 @@ class _FormProdutoState extends State<FormProduto> {
                 children: [
                   Container(
                       decoration: BoxDecoration(
-                          border:
-                              Border.all(color: Colors.orange.withOpacity(0.4)),
+                          border: Border.all(color: Colors.orange.withOpacity(0.4)),
                           borderRadius: BorderRadius.circular(30)),
                       child: const Padding(
                         padding: EdgeInsets.all(12),
@@ -317,8 +326,14 @@ class _FormProdutoState extends State<FormProduto> {
             ),
             GestureDetector(
               onTap: () async {
-                _formData['base64Imagem'] =
-                    await AnexoService().anexarImagem(TipoArquivo.camera) ?? '';
+                final base64Imagem = await AnexoService()
+                    .anexarImagem(TipoArquivo.camera);
+                if (base64Imagem != null) {
+                  setState(() {
+                    _formData['base64Imagem'] = base64Imagem;
+                  });
+                  Navigator.pop(context);
+                }
               },
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -326,8 +341,7 @@ class _FormProdutoState extends State<FormProduto> {
                 children: [
                   Container(
                       decoration: BoxDecoration(
-                          border:
-                              Border.all(color: Colors.orange.withOpacity(0.4)),
+                          border: Border.all(color: Colors.orange.withOpacity(0.4)),
                           borderRadius: BorderRadius.circular(30)),
                       child: const Padding(
                         padding: EdgeInsets.all(12),
