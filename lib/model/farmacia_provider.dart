@@ -251,41 +251,40 @@ class FarmaciaProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  List<Produto> carregarOsMaisVendidos() {
+    Map<String, int> contagemProdutosPorVenda = {};
+    List<Produto> maisVendidos = [];
 
-List<Produto> carregarOsMaisVendidos() {
-  Map<String, int> contagemProdutosPorVenda = {};
-  List<Produto> maisVendidos = [];
-
-  for (var venda in historicoVendas) {
-    for (Produto produto in venda.listaProduto) {
-      if (contagemProdutosPorVenda.containsKey(produto.id)) {
-        contagemProdutosPorVenda[produto.id] = contagemProdutosPorVenda[produto.id]! + produto.quantidadeVendida;
-      } else {
-        contagemProdutosPorVenda[produto.id] = produto.quantidadeVendida;
+    for (var venda in historicoVendas) {
+      for (Produto produto in venda.listaProduto) {
+        if (contagemProdutosPorVenda.containsKey(produto.id)) {
+          contagemProdutosPorVenda[produto.id] =
+              contagemProdutosPorVenda[produto.id]! + produto.quantidadeVendida;
+        } else {
+          contagemProdutosPorVenda[produto.id] = produto.quantidadeVendida;
+        }
       }
     }
+
+    // Transformar o mapa em uma lista de produtos com suas quantidades vendidas
+    List<MapEntry<String, int>> produtosOrdenados =
+        contagemProdutosPorVenda.entries.toList();
+
+    // Ordenar a lista pela quantidade vendida em ordem decrescente
+    produtosOrdenados.sort((a, b) => b.value.compareTo(a.value));
+
+    // Pegar os três primeiros produtos mais vendidos
+    for (var i = 0; i < produtosOrdenados.length && i < 3; i++) {
+      String idProduto = produtosOrdenados[i].key;
+      int quantidadeVendida = produtosOrdenados[i].value;
+
+      // Encontrar o produto correspondente na lista de produtos
+      Produto produto = produtos.firstWhere((prod) => prod.id == idProduto);
+      produto.quantidadeVendida =
+          quantidadeVendida; // Atualizar a quantidade vendida no objeto produto
+      maisVendidos.add(produto);
+    }
+
+    return maisVendidos;
   }
-
-  // Transformar o mapa em uma lista de produtos com suas quantidades vendidas
-  List<MapEntry<String, int>> produtosOrdenados = contagemProdutosPorVenda.entries.toList();
-
-  // Ordenar a lista pela quantidade vendida em ordem decrescente
-  produtosOrdenados.sort((a, b) => b.value.compareTo(a.value));
-
-  // Pegar os três primeiros produtos mais vendidos
-  for (var i = 0; i < produtosOrdenados.length && i < 3; i++) {
-    String idProduto = produtosOrdenados[i].key;
-    int quantidadeVendida = produtosOrdenados[i].value;
-
-    // Encontrar o produto correspondente na lista de produtos
-    Produto produto = produtos.firstWhere((prod) => prod.id == idProduto);
-    produto.quantidadeVendida = quantidadeVendida; // Atualizar a quantidade vendida no objeto produto
-    maisVendidos.add(produto);
-  }
-
-  return maisVendidos;
 }
-
-}
-
-

@@ -1,12 +1,15 @@
+import 'dart:convert';
+
 import 'package:app_farmacia/model/categoria_medicamento.dart';
 import 'package:app_farmacia/model/farmacia_provider.dart';
 import 'package:app_farmacia/model/produto.dart';
 import 'package:app_farmacia/screens/validacao.dart';
+import 'package:app_farmacia/service/anexo_service.dart';
 import 'package:app_farmacia/utils/app_routes.dart';
+import 'package:app_farmacia/utils/tipo_arquivo_enum.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-
 
 class FormProduto extends StatefulWidget {
   const FormProduto({super.key});
@@ -21,7 +24,7 @@ class _FormProdutoState extends State<FormProduto> {
   final _estoqueFocus = FocusNode();
   CategoriaMedicamento? _categoriaSelecionada;
   final _formKey = GlobalKey<FormState>();
-  final _formData = Map<String, Object>();
+  final _formData = <String, Object>{};
   final _validadeController = TextEditingController();
 
   Future<void> _selectDate(BuildContext context) async {
@@ -55,8 +58,10 @@ class _FormProdutoState extends State<FormProduto> {
         _formData['validade'] = produto.validade;
         _formData['estoque'] = produto.estoque;
         _formData['fornecedor'] = produto.fornecedor;
+        _formData['base64Imagem'] = produto.base64Imagem ?? '';
         _categoriaSelecionada = produto.categoria;
-        _validadeController.text = DateFormat('dd/MM/yyyy').format(produto.validade);
+        _validadeController.text =
+            DateFormat('dd/MM/yyyy').format(produto.validade);
       }
     }
   }
@@ -79,14 +84,15 @@ class _FormProdutoState extends State<FormProduto> {
 
     _formKey.currentState?.save();
     _formData['categoria'] = _categoriaSelecionada!;
-    
-     Provider.of<FarmaciaProvider>(
+
+    Provider.of<FarmaciaProvider>(
       context,
       listen: false,
     ).saveProduto(_formData).then((value) {
       Navigator.pushNamed(context, AppRoutes.HOME);
     });
-    print('${_formData['nome']} - ${_formData['categoria']} - ${_formData['preco']} - ${_formData['validade']} - ${_formData['estoque']} - ${_formData['fornecedor']}');
+    print(
+        '${_formData['nome']} - ${_formData['categoria']} - ${_formData['preco']} - ${_formData['validade']} - ${_formData['estoque']} - ${_formData['fornecedor']}');
   }
 
   @override
@@ -98,9 +104,45 @@ class _FormProdutoState extends State<FormProduto> {
           key: _formKey,
           child: ListView(
             children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 100,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black),
+                      ),
+                      child: _formData['base64Imagem'] != null
+                          ? Image.memory(
+                              base64Decode(_formData['base64Imagem'] as String))
+                          : const Icon(Icons.image_not_supported),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  ElevatedButton(
+                    onPressed: () {
+                      showModalBottomSheet(
+                        shape: const RoundedRectangleBorder(
+                          side: BorderSide(style: BorderStyle.none),
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(12),
+                            topRight: Radius.circular(12),
+                          ),
+                        ),
+                        isDismissible: true,
+                        context: context,
+                        isScrollControlled: true,
+                        builder: (BuildContext context) => _buildAnexoPopup(),
+                      );
+                    },
+                    child: const Text('Cadastrar foto'),
+                  ),
+                ],
+              ),
               TextFormField(
                 initialValue: _formData['nome']?.toString(),
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Nome',
                 ),
                 textInputAction: TextInputAction.next,
@@ -112,8 +154,9 @@ class _FormProdutoState extends State<FormProduto> {
               ),
               DropdownButtonFormField<CategoriaMedicamento>(
                 value: _categoriaSelecionada,
-                decoration: InputDecoration(labelText: 'Categoria'),
-                items: CategoriaMedicamento.values.map((CategoriaMedicamento categoria) {
+                decoration: const InputDecoration(labelText: 'Categoria'),
+                items: CategoriaMedicamento.values
+                    .map((CategoriaMedicamento categoria) {
                   return DropdownMenuItem<CategoriaMedicamento>(
                     value: categoria,
                     child: Text(categoria.toString().split('.').last),
@@ -128,10 +171,10 @@ class _FormProdutoState extends State<FormProduto> {
               ),
               TextFormField(
                 initialValue: _formData['preco']?.toString(),
-                decoration: InputDecoration(labelText: 'Preço'),
+                decoration: const InputDecoration(labelText: 'Preço'),
                 textInputAction: TextInputAction.next,
                 focusNode: _priceFocus,
-                keyboardType: TextInputType.numberWithOptions(
+                keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
                 onFieldSubmitted: (_) {
@@ -139,8 +182,8 @@ class _FormProdutoState extends State<FormProduto> {
                 },
                 onSaved: (preco) =>
                     _formData['preco'] = double.parse(preco ?? '0'),
-                validator: (_preco) {
-                  final precoString = _preco ?? '';
+                validator: (precoValidator) {
+                  final precoString = precoValidator ?? '';
                   final preco = double.tryParse(precoString) ?? -1;
 
                   if (preco <= 0) {
@@ -151,39 +194,39 @@ class _FormProdutoState extends State<FormProduto> {
                 },
               ),
               TextFormField(
-                controller: _validadeController,
-                decoration: InputDecoration(
-                  labelText: 'Validade',
-                  suffixIcon: IconButton(
-                    icon: Icon(Icons.calendar_today),
-                    onPressed: () => _selectDate(context),
+                  controller: _validadeController,
+                  decoration: InputDecoration(
+                    labelText: 'Validade',
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.calendar_today),
+                      onPressed: () => _selectDate(context),
+                    ),
                   ),
-                ),
-                readOnly: true,
-                validator: ValidaFormProdutos.validaCampo
-              ),
+                  readOnly: true,
+                  validator: ValidaFormProdutos.validaCampo),
               TextFormField(
                 initialValue: _formData['fornecedor']?.toString(),
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Fornecedor',
                 ),
                 textInputAction: TextInputAction.next,
                 onFieldSubmitted: (_) {
                   FocusScope.of(context).requestFocus(_estoqueFocus);
                 },
-                onSaved: (fornecedor) => _formData['fornecedor'] = fornecedor ?? '',
+                onSaved: (fornecedor) =>
+                    _formData['fornecedor'] = fornecedor ?? '',
                 validator: ValidaFormProdutos.validaCampo,
               ),
               TextFormField(
                 initialValue: _formData['estoque']?.toString(),
-                decoration: InputDecoration(labelText: 'Estoque'),
+                decoration: const InputDecoration(labelText: 'Estoque'),
                 textInputAction: TextInputAction.done,
                 focusNode: _estoqueFocus,
                 keyboardType: TextInputType.number,
                 onSaved: (estoque) =>
                     _formData['estoque'] = int.parse(estoque ?? '0'),
-                validator: (_estoque) {
-                  final estoqueString = _estoque ?? '';
+                validator: (estoqueValidator) {
+                  final estoqueString = estoqueValidator ?? '';
                   final estoque = int.tryParse(estoqueString) ?? -1;
 
                   if (estoque < 0) {
@@ -193,10 +236,10 @@ class _FormProdutoState extends State<FormProduto> {
                   return null;
                 },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _submitForm,
-                child: Text('Cadastrar Produto'),
+                child: const Text('Cadastrar Produto'),
               ),
             ],
           ),
@@ -204,4 +247,104 @@ class _FormProdutoState extends State<FormProduto> {
       ),
     );
   }
+
+  Widget _buildAnexoPopup() => Padding(
+        padding: const EdgeInsets.all(15),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            GestureDetector(
+              onTap: () async {
+                _formData['base64Imagem'] =
+                    await AnexoService().anexarImagem(TipoArquivo.galeria) ??
+                        '';
+              },
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                        border:
+                            Border.all(color: Colors.orange.withOpacity(0.4)),
+                        borderRadius: BorderRadius.circular(30)),
+                    child: const Padding(
+                      padding: EdgeInsets.all(12),
+                      child: Icon(
+                        Icons.photo,
+                        size: 30,
+                        color: Colors.orange,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  const Text(
+                    'Galeria',
+                  ),
+                ],
+              ),
+            ),
+            GestureDetector(
+              onTap: () async {
+                _formData['base64Imagem'] =
+                    await AnexoService().anexarImagem(TipoArquivo.storage) ??
+                        '';
+              },
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                      decoration: BoxDecoration(
+                          border:
+                              Border.all(color: Colors.orange.withOpacity(0.4)),
+                          borderRadius: BorderRadius.circular(30)),
+                      child: const Padding(
+                        padding: EdgeInsets.all(12),
+                        child: Icon(
+                          Icons.archive,
+                          size: 30,
+                          color: Colors.orange,
+                        ),
+                      )),
+                  const SizedBox(height: 10),
+                  const Text(
+                    'Arquivo',
+                  ),
+                ],
+              ),
+            ),
+            GestureDetector(
+              onTap: () async {
+                _formData['base64Imagem'] =
+                    await AnexoService().anexarImagem(TipoArquivo.camera) ?? '';
+              },
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                      decoration: BoxDecoration(
+                          border:
+                              Border.all(color: Colors.orange.withOpacity(0.4)),
+                          borderRadius: BorderRadius.circular(30)),
+                      child: const Padding(
+                        padding: EdgeInsets.all(12),
+                        child: Icon(
+                          Icons.camera_alt,
+                          size: 30,
+                          color: Colors.orange,
+                        ),
+                      )),
+                  const SizedBox(height: 10),
+                  const Text(
+                    'Tirar foto',
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
 }
