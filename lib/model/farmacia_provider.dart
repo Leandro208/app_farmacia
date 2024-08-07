@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:app_farmacia/model/categoria_medicamento.dart';
 import 'package:app_farmacia/model/produto.dart';
+import 'package:app_farmacia/utils/shared_prefs.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -10,7 +11,7 @@ class FarmaciaProvider extends ChangeNotifier {
   final _baseUrl = 'https://farmacia-78f3f-default-rtdb.firebaseio.com';
   List<Produto> _produtos = [];
   List<ProdutoPost> _produtosVendidos = [];
-
+  final SharedPrefs _sharedPrefs = SharedPrefs();
   List<Produto> _topProdutosVendidos = [];
 
   final Map<String, double> _mapDashboardValidade = {};
@@ -55,7 +56,8 @@ class FarmaciaProvider extends ChangeNotifier {
           "preco": produto.preco,
           "validade": produto.validade.toIso8601String(),
           "estoque": produto.estoque,
-          "fornecedor": produto.fornecedor
+          "fornecedor": produto.fornecedor,
+          "base64Imagem": produto.base64Imagem ?? ''
         }));
     return future.then((response) {
       print(jsonDecode(response.body));
@@ -68,7 +70,8 @@ class FarmaciaProvider extends ChangeNotifier {
           preco: produto.preco,
           validade: produto.validade,
           estoque: produto.estoque,
-          fornecedor: produto.fornecedor));
+          fornecedor: produto.fornecedor,
+          base64Imagem: produto.base64Imagem));
       notifyListeners();
       fetchProdutos();
     });
@@ -87,6 +90,7 @@ class FarmaciaProvider extends ChangeNotifier {
           "validade": produto.validade.toIso8601String(),
           "estoque": produto.estoque,
           "fornecedor": produto.fornecedor,
+          "base64Imagem": produto.base64Imagem ?? ''
         }),
       );
 
@@ -111,6 +115,7 @@ class FarmaciaProvider extends ChangeNotifier {
       final response = await http.delete(Uri.parse(url));
       if (response.statusCode == 200) {
         _produtos.removeWhere((p) => p.id == produto.id);
+        await _sharedPrefs.save(SharedPrefs.produtosGerais, _produtos); // Atualiza o SharedPrefs
         notifyListeners();
         fetchProdutos();
       } else {
@@ -131,7 +136,8 @@ class FarmaciaProvider extends ChangeNotifier {
         preco: data['preco'] as double,
         validade: data['validade'] as DateTime,
         estoque: data['estoque'] as int,
-        fornecedor: data['fornecedor'] as String);
+        fornecedor: data['fornecedor'] as String,
+        base64Imagem: data['base64Imagem'] as String?);
 
     if (hasId) {
       return updateProduto(produto);
@@ -141,47 +147,71 @@ class FarmaciaProvider extends ChangeNotifier {
   }
 
   Future<void> fetchProdutos() async {
-    final response = await http.get(Uri.parse('$_baseUrl/produto.json'));
+    try {
+      final response = await http.get(Uri.parse('$_baseUrl/produto.json'));
 
-    if (response.statusCode == 200) {
-      final extractedData = jsonDecode(response.body) as Map<String, dynamic>;
-      final List<Produto> loadedProdutos = [];
-      extractedData.forEach((prodId, prodData) {
-        loadedProdutos.add(Produto(
-          id: prodId,
-          nome: prodData['nome'],
-          categoria: CategoriaMedicamento.values.firstWhere(
-            (cat) => cat.toString().split('.').last == prodData['categoria'],
-          ),
-          preco: prodData['preco'],
-          validade: DateTime.parse(prodData['validade']),
-          estoque: prodData['estoque'],
-          fornecedor: prodData['fornecedor'],
-        ));
-      });
-      _produtos = loadedProdutos;
+      if (response.statusCode == 200) {
+        final extractedData = jsonDecode(response.body) as Map<String, dynamic>;
+        final List<Produto> loadedProdutos = [];
+        extractedData.forEach((prodId, prodData) {
+          loadedProdutos.add(Produto(
+            id: prodId,
+            nome: prodData['nome'],
+            categoria: CategoriaMedicamento.values.firstWhere(
+              (cat) => cat.toString().split('.').last == prodData['categoria'],
+            ),
+            preco: prodData['preco'],
+            validade: DateTime.parse(prodData['validade']),
+            estoque: prodData['estoque'],
+            fornecedor: prodData['fornecedor'],
+            base64Imagem: prodData['base64Imagem'] ?? '',
+          ));
+        });
+        _produtos = loadedProdutos;
+        await _sharedPrefs.save(SharedPrefs.produtosGerais, _produtos);
+        notifyListeners();
+        loadDashboard();
+      }
+    } catch (e) {
+      if (!await _sharedPrefs.contem(SharedPrefs.produtosGerais)) return;
+      List teste = (await _sharedPrefs.read(SharedPrefs.produtosGerais))
+          .map((e) => Produto.fromJson(e))
+          .toList();
+      _produtos = List<Produto>.from(teste);
       notifyListeners();
       loadDashboard();
-    } else {
-      throw Exception('Falha ao ler os produtos');
     }
   }
 
   Future<void> getProdutosVendidos() async {
-    final response = await http.get(Uri.parse('$_baseUrl/historicoVenda.json'));
+    try {
+      final response =
+          await http.get(Uri.parse('$_baseUrl/historicoVenda.json'));
 
-    if (response.statusCode == 200 && response.body != 'null') {
-      final extractedData = jsonDecode(response.body) as Map<String, dynamic>;
-      final List<ProdutoPost> loadedProdutos = [];
-      extractedData.forEach((prodId, prodData) {
-        loadedProdutos.add(ProdutoPost(
-          id: prodId,
-          dataVenda: prodData['dataVenda'],
-          listaProduto:
-              prodData['listaProduto'].map((e) => Produto.fromJson(e)).toList(),
-        ));
-      });
-      _produtosVendidos = loadedProdutos;
+      if (response.statusCode == 200 && response.body != 'null') {
+        final extractedData = jsonDecode(response.body) as Map<String, dynamic>;
+        final List<ProdutoPost> loadedProdutos = [];
+        extractedData.forEach((prodId, prodData) {
+          loadedProdutos.add(ProdutoPost(
+            id: prodId,
+            dataVenda: prodData['dataVenda'],
+            listaProduto: prodData['listaProduto']
+                .map((e) => Produto.fromJson(e))
+                .toList(),
+          ));
+        });
+        _produtosVendidos = loadedProdutos;
+        await _sharedPrefs.save(
+            SharedPrefs.produtosVendidos, _produtosVendidos);
+        notifyListeners();
+        loadDashboard();
+      }
+    } catch (e) {
+      if (!await _sharedPrefs.contem(SharedPrefs.produtosVendidos)) return;
+      _produtosVendidos = List<ProdutoPost>.from(
+          (await _sharedPrefs.read(SharedPrefs.produtosVendidos))
+              .map((e) => ProdutoPost.fromJson(e))
+              .toList());
       notifyListeners();
       loadDashboard();
     }
@@ -227,8 +257,9 @@ class FarmaciaProvider extends ChangeNotifier {
     DateTime hoje = DateTime.now();
 
     // Calcula a data daqui a uma semana
-    DateTime umaSemanaDepois = hoje.add(const Duration(days: 7));
-    for (var produto in _produtos) {
+    DateTime umaSemanaDepois = hoje.add(Duration(days: 7));
+
+    for (Produto produto in produtos) {
       if (produto.estoque >= 2) {
         bomEstoque++;
       } else {
@@ -251,41 +282,40 @@ class FarmaciaProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  List<Produto> carregarOsMaisVendidos() {
+    Map<String, int> contagemProdutosPorVenda = {};
+    List<Produto> maisVendidos = [];
 
-List<Produto> carregarOsMaisVendidos() {
-  Map<String, int> contagemProdutosPorVenda = {};
-  List<Produto> maisVendidos = [];
-
-  for (var venda in historicoVendas) {
-    for (Produto produto in venda.listaProduto) {
-      if (contagemProdutosPorVenda.containsKey(produto.id)) {
-        contagemProdutosPorVenda[produto.id] = contagemProdutosPorVenda[produto.id]! + produto.quantidadeVendida;
-      } else {
-        contagemProdutosPorVenda[produto.id] = produto.quantidadeVendida;
+    for (var venda in historicoVendas) {
+      for (Produto produto in venda.listaProduto) {
+        if (contagemProdutosPorVenda.containsKey(produto.id)) {
+          contagemProdutosPorVenda[produto.id] =
+              contagemProdutosPorVenda[produto.id]! + produto.quantidadeVendida;
+        } else {
+          contagemProdutosPorVenda[produto.id] = produto.quantidadeVendida;
+        }
       }
     }
+
+    // Transformar o mapa em uma lista de produtos com suas quantidades vendidas
+    List<MapEntry<String, int>> produtosOrdenados =
+        contagemProdutosPorVenda.entries.toList();
+
+    // Ordenar a lista pela quantidade vendida em ordem decrescente
+    produtosOrdenados.sort((a, b) => b.value.compareTo(a.value));
+
+    // Pegar os três primeiros produtos mais vendidos
+    for (var i = 0; i < produtosOrdenados.length && i < 3; i++) {
+      String idProduto = produtosOrdenados[i].key;
+      int quantidadeVendida = produtosOrdenados[i].value;
+
+      // Encontrar o produto correspondente na lista de produtos
+      Produto produto = produtos.firstWhere((prod) => prod.id == idProduto);
+      produto.quantidadeVendida =
+          quantidadeVendida; // Atualizar a quantidade vendida no objeto produto
+      maisVendidos.add(produto);
+    }
+
+    return maisVendidos;
   }
-
-  // Transformar o mapa em uma lista de produtos com suas quantidades vendidas
-  List<MapEntry<String, int>> produtosOrdenados = contagemProdutosPorVenda.entries.toList();
-
-  // Ordenar a lista pela quantidade vendida em ordem decrescente
-  produtosOrdenados.sort((a, b) => b.value.compareTo(a.value));
-
-  // Pegar os três primeiros produtos mais vendidos
-  for (var i = 0; i < produtosOrdenados.length && i < 3; i++) {
-    String idProduto = produtosOrdenados[i].key;
-    int quantidadeVendida = produtosOrdenados[i].value;
-
-    // Encontrar o produto correspondente na lista de produtos
-    Produto produto = produtos.firstWhere((prod) => prod.id == idProduto);
-    produto.quantidadeVendida = quantidadeVendida; // Atualizar a quantidade vendida no objeto produto
-    maisVendidos.add(produto);
-  }
-
-  return maisVendidos;
 }
-
-}
-
-

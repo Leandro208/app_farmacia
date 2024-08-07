@@ -1,4 +1,4 @@
 {
-    "dart.flutterSdkPath": "/home/arthur/.puro/envs/3.22.1/flutter",
-    "dart.sdkPath": "/home/arthur/.puro/envs/3.22.1/flutter/bin/cache/dart-sdk"
+    "dart.flutterSdkPath": "/home/arthur/.puro/envs/stable/flutter",
+    "dart.sdkPath": "/home/arthur/.puro/envs/stable/flutter/bin/cache/dart-sdk"
 }

@@ -10,7 +10,8 @@ class Produto {
   int estoque;
   String fornecedor;
   int quantidadeVendida;
-  
+  String? base64Imagem;
+
   Produto({
     required this.id,
     required this.nome,
@@ -19,6 +20,7 @@ class Produto {
     required this.validade,
     required this.estoque,
     required this.fornecedor,
+    this.base64Imagem,
     this.quantidadeVendida = 0,
   });
 
@@ -31,6 +33,7 @@ class Produto {
       "validade": validade.millisecondsSinceEpoch,
       "estoque": estoque,
       "fornecedor": fornecedor,
+      "base64Imagem": base64Imagem,
       "quantidadeVendida": quantidadeVendida,
     };
   }
@@ -45,6 +48,7 @@ class Produto {
       validade: DateTime.fromMillisecondsSinceEpoch(map["validade"] as int),
       estoque: map["estoque"] as int,
       fornecedor: map["fornecedor"] as String,
+      base64Imagem: map["base64Imagem"] ?? '',
       quantidadeVendida: map["quantidadeVendida"] as int,
     );
   }
@@ -70,7 +74,7 @@ class ProdutoPost {
 
   factory ProdutoPost.fromJson(Map<String, dynamic> map) {
     return ProdutoPost(
-      id: map['id']??'',
+      id: map['id'] ?? '',
       listaProduto: List<Produto>.from(
         (map['listaProduto'] as List).map<Produto>(
           (x) => Produto.fromJson(x as Map<String, dynamic>),

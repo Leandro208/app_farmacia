@@ -1,29 +1,35 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:open_filex/open_filex.dart';
 
 class NotificationService {
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
-  NotificationService() {
-    _initializeNotifications();
-  }
+  NotificationService();
 
-  void _initializeNotifications() async {
+  void initializeNotifications(String? path) async {
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
 
-    final InitializationSettings initializationSettings =
+    const InitializationSettings initializationSettings =
         InitializationSettings(
       android: initializationSettingsAndroid,
     );
 
-    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+    await flutterLocalNotificationsPlugin.initialize(
+      initializationSettings,
+      onDidReceiveNotificationResponse:
+          (NotificationResponse notificationResponse) async {
+        OpenFilex.open(path);
+      },
+    );
   }
 
- Future<void> showNotification(String title, String body) async {
+  Future<void> showNotification(String title, String body) async {
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails(
-      'stock_alert_channel', 
-      'Stock Alert Notifications', 
+      'stock_alert_channel',
+      'Stock Alert Notifications',
       importance: Importance.max,
       priority: Priority.high,
     );

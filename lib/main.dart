@@ -4,11 +4,14 @@ import 'package:app_farmacia/screens/form_produto.dart';
 import 'package:app_farmacia/screens/historico_venda.dart';
 import 'package:app_farmacia/screens/manage_produtos.dart';
 import 'package:app_farmacia/screens/tabs_screen.dart';
+import 'package:app_farmacia/service/notification_service.dart';
 import 'package:app_farmacia/utils/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  NotificationService().initializeNotifications('');
   runApp(const MyApp());
 }
 

@@ -130,7 +130,6 @@ class _FormVendaState extends State<FormVenda> {
                       onTap: isCarregando
                           ? null
                           : () {
-                              // Navegar para a tela de detalhes do produto
                               Navigator.pushNamed(
                                 context,
                                 AppRoutes.DETALHES_PRODUTO,
@@ -150,7 +149,7 @@ class _FormVendaState extends State<FormVenda> {
                   isCarregando = true;
                 });
                 final vendasMap = {for (var pd in produtosVendidos) pd.id: pd};
-                List idAtualizar = [];
+                List<int> idAtualizar = [];
                 for (int i = 0; i < produtos.length; i++) {
                   if (vendasMap.containsKey(produtos[i].id)) {
                     var venda = vendasMap[produtos[i].id];
@@ -177,8 +176,8 @@ class _FormVendaState extends State<FormVenda> {
                       listaProduto: produtosVendidos,
                     ))
                     .then(
-                      (teste) => setState(
-                        () {
+                      (teste) {
+                        setState(() {
                           isCarregando = false;
                           produtosVendidos.forEach((produtoVendido) {
                             if (produtoVendido.quantidadeVendida == produtoVendido.estoque) {
@@ -201,8 +200,8 @@ class _FormVendaState extends State<FormVenda> {
                             Navigator.pushNamed(
                                 context, AppRoutes.HOME);
                           });
-                        },
-                      ),
+                        });
+                      },
                     );
               },
               child: Container(
